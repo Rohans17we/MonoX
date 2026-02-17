@@ -24,27 +24,23 @@ const LoginModal = ({ open, onClose, onSignupClick }) => {
     e.preventDefault();
     setLoading(true);
 
-    // Mock login - replace with actual API call later
-    setTimeout(() => {
-      const mockUser = {
-        id: 'user1',
-        username: formData.email.split('@')[0],
-        email: formData.email,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.email}`,
-        isPremium: false,
-        gamesPlayed: 0,
-        gamesWon: 0,
-      };
-      const mockToken = 'mock-jwt-token-' + Date.now();
-      
-      login(mockUser, mockToken);
+    try {
+      await login(formData.email, formData.password);
       toast({
         title: 'Welcome back!',
         description: 'You have successfully logged in.',
       });
-      setLoading(false);
       onClose();
-    }, 1000);
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: 'Login failed',
+        description: error.message || 'Invalid email or password',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e) => {

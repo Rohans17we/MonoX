@@ -36,27 +36,23 @@ const SignupModal = ({ open, onClose, onLoginClick }) => {
 
     setLoading(true);
 
-    // Mock signup - replace with actual API call later
-    setTimeout(() => {
-      const mockUser = {
-        id: 'user-' + Date.now(),
-        username: formData.username,
-        email: formData.email,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.username}`,
-        isPremium: false,
-        gamesPlayed: 0,
-        gamesWon: 0,
-      };
-      const mockToken = 'mock-jwt-token-' + Date.now();
-      
-      signup(mockUser, mockToken);
+    try {
+      await signup(formData.email, formData.password, formData.username);
       toast({
         title: 'Account created!',
         description: 'Welcome to Monopoly. Let\'s play!',
       });
-      setLoading(false);
       onClose();
-    }, 1000);
+    } catch (error) {
+      console.error('Signup error:', error);
+      toast({
+        title: 'Signup failed',
+        description: error.message || 'Failed to create account',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e) => {

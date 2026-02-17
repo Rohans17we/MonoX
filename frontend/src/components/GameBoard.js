@@ -34,10 +34,10 @@ const GameBoard = ({ gameState, players, onSpaceClick }) => {
   };
 
   return (
-    <div className=\"game-board-container\">
-      <div className=\"game-board\">
+    <div className="game-board-container">
+      <div className="game-board">
         {/* Top row */}
-        <div className=\"board-row top-row\">
+        <div className="board-row top-row">
           <BoardSpace 
             space={corners.topLeft} 
             players={players}
@@ -60,9 +60,9 @@ const GameBoard = ({ gameState, players, onSpaceClick }) => {
         </div>
 
         {/* Middle section with left, center, right */}
-        <div className=\"board-middle\">
+        <div className="board-middle">
           {/* Left column */}
-          <div className=\"board-column left-column\">
+          <div className="board-column left-column">
             {leftSpaces.map(space => (
               <BoardSpace
                 key={space.id}
@@ -75,26 +75,26 @@ const GameBoard = ({ gameState, players, onSpaceClick }) => {
           </div>
 
           {/* Center area */}
-          <div className=\"board-center\">
-            <div className=\"center-content\">
-              <div className=\"text-center\">
-                <h1 className=\"text-4xl font-bold mb-2 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent\">
+          <div className="board-center">
+            <div className="center-content">
+              <div className="text-center">
+                <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                   MONOPOLY
                 </h1>
-                <p className=\"text-sm text-muted-foreground\">
+                <p className="text-sm text-muted-foreground">
                   Build your empire!
                 </p>
               </div>
               
               {gameState && gameState.currentPlayerIndex !== undefined && (
-                <div className=\"mt-8 p-4 bg-card rounded-lg border shadow-sm\">
-                  <p className=\"text-sm font-semibold mb-2\">Current Turn:</p>
-                  <div className=\"flex items-center gap-2\">
+                <div className="mt-8 p-4 bg-card rounded-lg border shadow-sm">
+                  <p className="text-sm font-semibold mb-2">Current Turn:</p>
+                  <div className="flex items-center gap-2">
                     <div 
-                      className=\"w-6 h-6 rounded-full border-2 border-white shadow\"
+                      className="w-6 h-6 rounded-full border-2 border-white shadow"
                       style={{ backgroundColor: players[gameState.currentPlayerIndex]?.color }}
                     />
-                    <span className=\"font-bold\">
+                    <span className="font-bold">
                       {players[gameState.currentPlayerIndex]?.username}
                     </span>
                   </div>
@@ -102,17 +102,17 @@ const GameBoard = ({ gameState, players, onSpaceClick }) => {
               )}
               
               {gameState?.dice && gameState.dice[0] > 0 && (
-                <div className=\"mt-4 p-4 bg-card rounded-lg border shadow-sm\">
-                  <p className=\"text-sm font-semibold mb-2\">Last Roll:</p>
-                  <div className=\"flex gap-2 justify-center\">
-                    <div className=\"dice-face\">
+                <div className="mt-4 p-4 bg-card rounded-lg border shadow-sm">
+                  <p className="text-sm font-semibold mb-2">Last Roll:</p>
+                  <div className="flex gap-2 justify-center">
+                    <div className="dice-face">
                       {gameState.dice[0]}
                     </div>
-                    <div className=\"dice-face\">
+                    <div className="dice-face">
                       {gameState.dice[1]}
                     </div>
                   </div>
-                  <p className=\"text-center mt-2 text-sm\">
+                  <p className="text-center mt-2 text-sm">
                     Total: {gameState.dice[0] + gameState.dice[1]}
                   </p>
                 </div>
@@ -121,7 +121,7 @@ const GameBoard = ({ gameState, players, onSpaceClick }) => {
           </div>
 
           {/* Right column */}
-          <div className=\"board-column right-column\">
+          <div className="board-column right-column">
             {rightSpaces.map(space => (
               <BoardSpace
                 key={space.id}
@@ -135,7 +135,7 @@ const GameBoard = ({ gameState, players, onSpaceClick }) => {
         </div>
 
         {/* Bottom row */}
-        <div className=\"board-row bottom-row\">
+        <div className="board-row bottom-row">
           <BoardSpace 
             space={corners.bottomLeft} 
             players={players}

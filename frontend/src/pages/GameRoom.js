@@ -23,7 +23,7 @@ import {
   buildHouse,
   checkWinCondition
 } from '../services/gameService';
-import { boardSpaces, playerColors } from '../data/boardData';
+import { boardSpaces, playerColors } from '../boardData';
 
 const GameRoom = () => {
   const { roomId } = useParams();

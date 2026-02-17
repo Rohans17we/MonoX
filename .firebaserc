@@ -1,5 +1,5 @@
-node_modules
-build
-.env
-*.log
-.DS_Store
+{
+  "projects": {
+    "default": "monox-50fd3"
+  }
+}

@@ -1,6 +1,6 @@
 import { doc, updateDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { boardSpaces, chanceCards, communityChestCards, colorGroups } from '../data/boardData';
+import { boardSpaces, chanceCards, communityChestCards, colorGroups } from '../boardData';
 
 // Initialize game state
 export const initializeGame = (room) => {

@@ -1,4 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../config/firebase';
+import { signUpUser, loginUser, logoutUser } from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -16,41 +20,78 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for saved user in localStorage
-    const savedUser = localStorage.getItem('monopoly-user');
-    const savedToken = localStorage.getItem('monopoly-token');
-    
-    if (savedUser && savedToken) {
-      setUser(JSON.parse(savedUser));
-      setIsAuthenticated(true);
-    }
-    setLoading(false);
+    // Listen to Firebase auth state changes
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          // Get user data from Firestore
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setUser(userData);
+            setIsAuthenticated(true);
+          } else {
+            // Fallback user data
+            const userData = {
+              uid: firebaseUser.uid,
+              username: firebaseUser.displayName || firebaseUser.email?.split('@')[0],
+              email: firebaseUser.email,
+              avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
+              isPremium: false,
+              gamesPlayed: 0,
+              gamesWon: 0
+            };
+            setUser(userData);
+            setIsAuthenticated(true);
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const login = (userData, token) => {
-    setUser(userData);
-    setIsAuthenticated(true);
-    localStorage.setItem('monopoly-user', JSON.stringify(userData));
-    localStorage.setItem('monopoly-token', token);
+  const login = async (email, password) => {
+    try {
+      const userData = await loginUser(email, password);
+      setUser(userData);
+      setIsAuthenticated(true);
+      return userData;
+    } catch (error) {
+      throw error;
+    }
   };
 
-  const signup = (userData, token) => {
-    setUser(userData);
-    setIsAuthenticated(true);
-    localStorage.setItem('monopoly-user', JSON.stringify(userData));
-    localStorage.setItem('monopoly-token', token);
+  const signup = async (email, password, username) => {
+    try {
+      const userData = await signUpUser(email, password, username);
+      setUser(userData);
+      setIsAuthenticated(true);
+      return userData;
+    } catch (error) {
+      throw error;
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('monopoly-user');
-    localStorage.removeItem('monopoly-token');
+  const logout = async () => {
+    try {
+      await logoutUser();
+      setUser(null);
+      setIsAuthenticated(false);
+    } catch (error) {
+      throw error;
+    }
   };
 
   const updateUser = (userData) => {
-    setUser(userData);
-    localStorage.setItem('monopoly-user', JSON.stringify(userData));
+    setUser({ ...user, ...userData });
   };
 
   return (

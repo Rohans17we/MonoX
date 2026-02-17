@@ -1,46 +1,116 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { auth } from '../config/firebase';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Plus, Grid3x3, List } from 'lucide-react';
 import RoomCard from '../components/RoomCard';
 import BoardCard from '../components/BoardCard';
 import CreateRoomModal from '../components/CreateRoomModal';
-import { mockRooms, mockBoards } from '../mock/mockData';
+import { mockBoards } from '../mock/mockData';
 import { toast } from '../hooks/use-toast';
+import { createRoom, subscribeToRooms, joinRoom } from '../services/roomService';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
-  const [rooms, setRooms] = useState(mockRooms);
+  const [rooms, setRooms] = useState([]);
   const [selectedBoard, setSelectedBoard] = useState('international');
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check if user has nickname (guest) or is authenticated
     const guestNickname = sessionStorage.getItem('guestNickname');
     if (!isAuthenticated && !guestNickname) {
       navigate('/');
+      return;
     }
+
+    // Subscribe to real-time room updates
+    const unsubscribe = subscribeToRooms((updatedRooms) => {
+      setRooms(updatedRooms);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, [isAuthenticated, navigate]);
 
-  const handleRoomCreated = (newRoom) => {
-    setRooms([newRoom, ...rooms]);
+  const handleRoomCreated = async (roomData) => {
+    try {
+      const currentUser = auth.currentUser || {
+        uid: 'guest-' + Date.now(),
+        displayName: sessionStorage.getItem('guestNickname') || 'Guest',
+        photoURL: null
+      };
+
+      const newRoom = await createRoom(roomData, {
+        uid: currentUser.uid,
+        username: user?.username || currentUser.displayName,
+        avatar: user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.displayName}`
+      });
+
+      toast({
+        title: 'Room created!',
+        description: `"${roomData.roomName}" is ready for players.`,
+      });
+
+      // Navigate to the room
+      navigate(`/room/${newRoom.id}`);
+    } catch (error) {
+      console.error('Error creating room:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create room. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const handleJoinRoom = (roomId) => {
-    toast({
-      title: 'Joining room...',
-      description: 'Connecting to game room',
-    });
-    // Navigate to game room (will be implemented later)
-    navigate(`/room/${roomId}`);
+  const handleJoinRoom = async (roomId) => {
+    try {
+      const currentUser = auth.currentUser || {
+        uid: 'guest-' + Date.now(),
+        displayName: sessionStorage.getItem('guestNickname') || 'Guest'
+      };
+
+      await joinRoom(roomId, {
+        id: currentUser.uid,
+        username: user?.username || currentUser.displayName,
+        avatar: user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.displayName}`
+      });
+
+      toast({
+        title: 'Joined room!',
+        description: 'You have successfully joined the game.',
+      });
+
+      navigate(`/room/${roomId}`);
+    } catch (error) {
+      console.error('Error joining room:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to join room.',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const publicRooms = rooms.filter(room => !room.isPrivate);
+  const publicRooms = rooms.filter(room => !room.isPrivate && room.status === 'waiting');
   const availableBoards = mockBoards.filter(board => !board.isPremium || user?.isPremium);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 mx-auto border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground">Loading rooms...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50/50 via-emerald-50/50 to-teal-50/50 dark:from-green-950/10 dark:via-emerald-950/10 dark:to-teal-950/10">

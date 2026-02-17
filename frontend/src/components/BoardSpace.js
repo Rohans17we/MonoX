@@ -1,5 +1,5 @@
 import React from 'react';
-import { propertyColors } from '../../data/boardData';
+import { propertyColors } from '../boardData';
 import { Home, Hotel } from 'lucide-react';
 
 const BoardSpace = ({ space, players, owner, onClick }) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BoardSpace from './BoardSpace';
-import { boardSpaces } from '../data/boardData';
+import { boardSpaces } from '../boardData';
 import './GameBoard.css';
 
 const GameBoard = ({ gameState, players, onSpaceClick }) => {
